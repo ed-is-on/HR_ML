@@ -50,6 +50,10 @@ data.drop("Started_Training", axis=1, inplace=True)
 data.TotTrainInvt.fillna(0, inplace=True) #NaN = haven't filled out an SF182 in 2016 -therefore assumed to have had $0 spent on them in training
 data.NumTraining.fillna(0, inplace=True) #NaN = haven't filled out an SF182 in 2016 -therefore assumed took 0 training events
 data.TotCreditHours.fillna(0, inplace=True) #NaN = haven't filled out an SF182 in 2016 -officially earned 0 credit hours paid by ED 
+data.SickLeaveHours.fillna(0, inplace=True) #NaN = didn't use sick leave in 2016
+data.TeleHours.fillna(0, inplace=True) #NaN = didn't record telework hours in 2016
+data.PrmtLstYr.fillna(0, inplace=True) #NaN = wasn't promoted during 2016
+data.AnnualLeaveHrs.fillna(0, inplace=True) #NaN = didn't take leave during 2016
 
 #create attrit column - combo of retirement and separated over 2017
 def check_left(row):
@@ -62,11 +66,63 @@ def check_left(row):
 
 data['attrit'] = data.apply(lambda row: check_left(row),axis=1)
 
-#fill in 0's for separated and retired
+#performance report indicate not rated as a category
+data.LstPfmRt.fillna("NR", inplace=True) #NaN = NR as in not rated - likely more categories in NR but cannot pull out at this time
+#Retirement category
+data.RetPln.fillna("K", inplace=True) #NaN = K as it is the highest frequency plan by a huge margin. Researching more into the missing data.
+
+#convert date columns
+data['ERetDt1'] = pd.to_datetime(data['ERetDt']) #create date/time version
+data['RetDt1'] = pd.to_datetime(data['RetDt']) #create date/time version
+#calculate days until
+data['ERetDayUnt'] = data['ERetDt1'].sub(pd.to_datetime('12/31/2016'), axis=0)/ np.timedelta64(1, 'D') #days until early retirement as of Dec 31 2016
+data['RetDayUnt'] = data['RetDt1'].sub(pd.to_datetime('12/31/2016'), axis=0)/ np.timedelta64(1, 'D') #days until retirement as of Dec 31 2016
+#fill in NaN with average
+#data['ERetDayUnt'].hist()
+data.ERetDayUnt.fillna(data['ERetDayUnt'].mean(), inplace=True) #NaN = mean of days
+data.RetDayUnt.fillna(data['RetDayUnt'].mean(), inplace=True) #NaN = mean of days
+
+#move categoricals to separate columns
+poc = pd.get_dummies(data['POC'])
+pp = pd.get_dummies(data['Pay_Plan'], prefix='payPln')
+pRpt = pd.get_dummies(data['LstPfmRt'], prefix='perfRev')
+rPln = pd.get_dummies(data['RetPln'], prefix='retPln')
+#srs = pd.get_dummies(data['Series'], prefix='series') #not sure if the ML will take series as a number var instead of category
+
+#merge into data
+data = data.join(poc)
+data = data.join(pp)
+data = data.join(pRpt)
+data = data.join(rPln)
+#data = data.join(srs)
+
+#drop columns no longer needed
+data.drop("Separated", axis=1, inplace=True)
+data.drop("Retired", axis=1, inplace=True)
+data.drop("ERetDt", axis=1, inplace=True)
+data.drop("RetDt", axis=1, inplace=True)
+data.drop("ERetDt1", axis=1, inplace=True)
+data.drop("RetDt1", axis=1, inplace=True)
+data.drop("POC", axis=1, inplace=True)
+data.drop("Pay_Plan", axis=1, inplace=True)
+data.drop("LstPfmRt", axis=1, inplace=True)
+data.drop("RetPln", axis=1, inplace=True)
+#data.drop("Series", axis=1, inplace=True)
+
+#---some visualizations on the data framework
+#negative = data[data['attrit'].isin([1])]
+#positive = data[data['attrit'].isin([0])]
+
+#fig, ax = plt.subplots(figsize=(12,8))
+#ax.scatter(positive['PrmtLstYr'], positive['SickLeaveHours'], s=50, c='b', marker='o', label='Attrit')
+#ax.scatter(negative['PrmtLstYr'], negative['SickLeaveHours'], s=50, c='r', marker='x', label='Not Attrit')
+#ax.legend()
+#ax.set_xlabel('Promoted Last Year')
+#ax.set_ylabel('Sick Leave Hours')
 
 
-#print(data.head())
+#---visualize missing data tool
 #sns.heatmap(data.isnull(), yticklabels=False, cbar=False, cmap='viridis')
-#plt.show()
-#print(data.shape)
-#print(data.head())
+
+#export data
+data.to_csv('[HR_ML]\Data\HRMLclean.csv')
