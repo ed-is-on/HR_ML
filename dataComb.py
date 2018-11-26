@@ -109,20 +109,10 @@ data.drop("LstPfmRt", axis=1, inplace=True)
 data.drop("RetPln", axis=1, inplace=True)
 #data.drop("Series", axis=1, inplace=True)
 
-#---some visualizations on the data framework
-#negative = data[data['attrit'].isin([1])]
-#positive = data[data['attrit'].isin([0])]
-
-#fig, ax = plt.subplots(figsize=(12,8))
-#ax.scatter(positive['PrmtLstYr'], positive['SickLeaveHours'], s=50, c='b', marker='o', label='Attrit')
-#ax.scatter(negative['PrmtLstYr'], negative['SickLeaveHours'], s=50, c='r', marker='x', label='Not Attrit')
-#ax.legend()
-#ax.set_xlabel('Promoted Last Year')
-#ax.set_ylabel('Sick Leave Hours')
-
-
-#---visualize missing data tool
+#---visualize missing data tool  ---#
 #sns.heatmap(data.isnull(), yticklabels=False, cbar=False, cmap='viridis')
 
 #export data
-data.to_csv('[HR_ML]\Data\HRMLclean.csv')
+#data.to_csv('[HR_ML]\Data\HRMLclean.csv')
+
+#print(data.shape)
