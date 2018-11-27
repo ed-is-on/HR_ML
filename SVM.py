@@ -1,6 +1,5 @@
 import pandas as pd 
 import numpy as np 
-import seaborn as sns 
 import matplotlib.pyplot as plt 
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
@@ -26,3 +25,5 @@ print(grid.best_params_) #print best fit parameters
 grid_pred = grid.predict(X_test) #make predictions on test data
 
 print(confusion_matrix(y_test, grid_pred)) #print confusion matrix
+
+#accuracy rate of 90% but type I error is very high with poor recal. 
