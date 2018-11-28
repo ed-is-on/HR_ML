@@ -41,7 +41,7 @@ X = dataS.drop("attrit", axis=1) #make X all independent variables
 y = dataS[['attrit']] #make y the dependent variable
 
 #create training data
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = .3, random_state = 67)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = .3, random_state = 121)
 
 # create model
 model = Sequential()
@@ -53,18 +53,18 @@ model.add(Dense(5, kernel_initializer='RandomNormal', activation='relu'))
 model.add(Dense(1, activation='sigmoid'))
 
 # Compile model
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['binary_accuracy'])
+model.compile(loss='logcosh', optimizer='adam', metrics=['binary_accuracy'])
 
 # Fit the model
-model.fit(X_train, y_train, epochs=50, batch_size=10)
+model.fit(X_train, y_train, epochs=35, batch_size=8)
 
 # evaluate the model
 Xpred = model.predict(X_test)
-plt.hist(Xpred, bins=50)
-plt.show()
-x_pred = (Xpred > 0.5).astype(int) #0.1 reduces type I error to almost 99.2%; 0.45 produces higher accuracy but less control over type I or II error
+#plt.hist(Xpred, bins=50)
+#plt.show()
+x_pred = (Xpred > 0.5).astype(int) #0.1 reduces type I error to above 99%; 0.45 produces higher accuracy but less control over type I or II error
 print(confusion_matrix(y_test, x_pred))
 scores = model.evaluate(X_test, y_test)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
-#overall accruacy is approximately 91.5-92% but when controlling for type I error it drops into the 80s
+#overall accuracy is approximately 91-92% (without overfit) but when controlling for type I error it drops into the 80s
