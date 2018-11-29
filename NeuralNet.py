@@ -62,9 +62,13 @@ model.fit(X_train, y_train, epochs=35, batch_size=8)
 Xpred = model.predict(X_test)
 #plt.hist(Xpred, bins=50)
 #plt.show()
-x_pred = (Xpred > 0.5).astype(int) #0.1 reduces type I error to above 99%; 0.45 produces higher accuracy but less control over type I or II error
+x_pred = (Xpred > 0.1).astype(int)  
 print(confusion_matrix(y_test, x_pred))
 scores = model.evaluate(X_test, y_test)
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
-#overall accuracy is approximately 91-92% (without overfit) but when controlling for type I error it drops into the 80s
+#overall accuracy is approximately 91-92% 
+#We can segment. 
+# >0.56 represents about 5% of the population which we have a 70% chance of leaving
+# 0.1<x<0.56 represents 20% of the population where we have a 50% chance of leaving
+# <0.1 represents 75% of the population which we have 1% chance of leaving
